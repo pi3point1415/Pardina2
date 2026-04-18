@@ -1,0 +1,14 @@
+[
+    {
+        "name": "test van",
+        "day": 1,
+        "where_time": "17:47:00",
+        "van_time": "17:48:00"
+    },
+    {
+        "name": "no where",
+        "day": 1,
+        "where_time": null,
+        "van_time": "17:49:00"
+    }
+]

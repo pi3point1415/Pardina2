@@ -1,0 +1,50 @@
+[
+    {
+        "name": "test van",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495147418369523862,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": "test van",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495174843367162108,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": "test vanHolds holds between buildings 39 and 24 by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495178366415015967,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": null,
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495178373448863895,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": "test van. Holds at beneath Stata by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495179121381081200,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": null,
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495179126397472868,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": "no where",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495179371227512852,
+        "exp": "2026-04-20"
+    },
+    {
+        "name": null,
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495179376625586186,
+        "exp": "2026-04-20"
+    }
+]
