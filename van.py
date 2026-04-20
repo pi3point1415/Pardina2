@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime, date, time
+from datetime import timedelta, datetime, date
 from random import choice
 from typing import *
 
@@ -8,12 +8,12 @@ from settings import Settings
 
 
 class Van:
-    def __init__(self, bot : discord.Client, name: str, msg : discord.Message):
+    def __init__(self, bot : discord.Client, name: str, channel_id : int, msg_id: int, exp: date):
         self.bot = bot
         self.name = name
-        self.channel_id = msg.channel.id
-        self.msg_id = msg.id
-        self.exp = datetime.now().date() + timedelta(days=2)
+        self.channel_id = channel_id
+        self.msg_id = msg_id
+        self.exp = exp
 
     @classmethod
     async def create(cls, bot : discord.Client, name : str, channel : discord.abc.Messageable) -> Van:
@@ -21,18 +21,28 @@ class Van:
 
         await msg.add_reaction(choice(Settings.van_emojis))
 
-        van = cls(bot, name, msg)
+        exp = datetime.now().date() + timedelta(days=2)
+
+        van = cls(bot, name, msg.channel.id, msg.id, exp)
 
         return van
 
     @property
-    async def msg(self) -> discord.Message:
+    async def msg(self) -> discord.Message | None:
         channel = await self.bot.fetch_channel(self.channel_id)
+
+        if not isinstance(channel, discord.abc.Messageable):
+            return None
+
         return await channel.fetch_message(self.msg_id)
 
     @property
     async def reactions(self) -> List[discord.Reaction]:
         msg = await self.msg
+
+        if msg is None:
+            return []
+
         return msg.reactions
 
 
@@ -45,16 +55,36 @@ class Van:
                     if user.id == self.bot.user.id:
                         continue
 
-                    names.add(user.name)
-                    # TODO add alias
-                    # if user.id in self.alias:
-                    #     names.add(self.alias[user.id])
-                    # else:
-                    #     names.add(user.name)
+                    alias = Settings.get_alias(user.id)
+                    if alias is not None:
+                        names.add(alias)
+                    else:
+                        names.add(user.name)
 
         msg = await self.msg
+
+        if msg is None:
+            return
 
         if len(names) == 0:
             await msg.edit(content=f'[Van] **{self.name}**')
         else:
             await msg.edit(content=f'[Van] **{self.name}**, holding for **{', '.join(names)}**')
+
+    def serialize(self) -> Dict:
+        return {
+            'name': self.name,
+            'channel_id': self.channel_id,
+            'msg_id': self.msg_id,
+            'exp': self.exp.isoformat()
+        }
+
+    @classmethod
+    def deserialize(cls, bot, data) -> Van:
+        return cls(
+            bot = bot,
+            name = data['name'],
+            channel_id = data['channel_id'],
+            msg_id = data['msg_id'],
+            exp = date.fromisoformat(data['exp']),
+        )

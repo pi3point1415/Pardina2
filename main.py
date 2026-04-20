@@ -119,8 +119,6 @@ from settings import Settings
 
 class Pardina(discord.Client):
     def __init__(self, *args, **kwargs):
-        self.json_indent = 4
-
         self.vans : List[Van] = []
 
         # self.database : Dict[str, str] = {
@@ -169,7 +167,7 @@ class Pardina(discord.Client):
 
 
     async def on_ready(self):
-        pass
+        self.vans = Settings.load_vans(self)
         # self.load_wheres()
         # self.load_vans()
         # self.load_alias()
@@ -202,6 +200,9 @@ class Pardina(discord.Client):
         if message.content.lower().startswith('van '):
             if message.channel.id == Settings.ch_van_holds:
                 await self.command_van(message)
+        elif message.content.lower().startswith('alias '):
+            if message.channel.id in Settings.alias_channels:
+                await self.command_alias(message)
 
     async def command_van(self, trigger_msg : discord.Message):
         channel = trigger_msg.channel
@@ -210,6 +211,16 @@ class Pardina(discord.Client):
             self.vans.append(await Van.create(self, name, channel))
             await trigger_msg.delete()
 
+        Settings.save_vans(self.vans)
+
+    async def command_alias(self, trigger_msg : discord.Message):
+        name = trigger_msg.content[6:]
+        Settings.add_alias(trigger_msg.author.id, name)
+
+        for van in self.vans:
+            await van.update()
+
+        await trigger_msg.delete()
 
     async def on_raw_reaction_add(self, reaction : discord.RawReactionActionEvent):
         await self.on_raw_reaction_change(reaction)
