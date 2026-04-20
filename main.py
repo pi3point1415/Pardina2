@@ -1,11 +1,10 @@
 from typing import *
-from datetime import timedelta, datetime
-import asyncio
 
 import discord
 
 import auto_van
 import van
+import schedule
 import settings
 
 
@@ -13,6 +12,7 @@ class Pardina(discord.Client):
     def __init__(self, *args, **kwargs):
         self.vans : List[van.Van] = []
         self.auto_vans : List[auto_van.AutoVan] = []
+        self.schedule : List[schedule.Schedule] = []
 
         super().__init__(*args, **kwargs)
 
@@ -21,19 +21,18 @@ class Pardina(discord.Client):
         self.vans = settings.Settings.load_vans(self)
         self.auto_vans = settings.Settings.load_auto_vans(self)
 
-        for i in self.auto_vans:
+        self.schedule = settings.Settings.load_schedule()
+
+        for i in self.schedule:
+            if i.is_today and not i.matches_auto_van(self.auto_vans):
+                self.auto_vans.append(i.to_auto_van(self))
+
+        # copy so that we still go through all of them if any are removed
+        auto_vans = self.auto_vans[::]
+        for i in auto_vans:
             await i.queue_where()
 
-        # where_time = (datetime.now() + timedelta(seconds=10)).time()
-        # van_time = (datetime.now() + timedelta(seconds=45)).time()
-        #
-        # auto = auto_van.AutoVan(self, 'test automatic', 1, where_time, van_time)
-        #
-        # self.auto_vans.append(auto)
-        #
-        # task = asyncio.create_task(auto.queue_where())
-        #
-        # settings.Settings.save_auto_vans(self.auto_vans)
+        settings.Settings.save_auto_vans(self.auto_vans)
 
     @property
     async def ch_van_holds(self) -> discord.abc.Messageable | None:

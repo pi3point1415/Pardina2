@@ -86,6 +86,7 @@ class AutoVan:
         )
 
         if van_time < now:
+            self.remove()
             return
 
         delay = (van_time - now).total_seconds()
@@ -121,9 +122,6 @@ class AutoVan:
             await channel.send(f'*{location.str_location()}{floor_text}*')
 
             new_van = await van.Van.create(self.bot, f'{self.name}: {location.str_hold()}', channel)
-            self.bot.vans.append(new_van)
-
-            settings.Settings.save_vans(self.bot.vans)
         else:
             channel = await self.bot.fetch_channel(settings.Settings.ch_van_holds)
 
@@ -131,9 +129,15 @@ class AutoVan:
                 return
 
             new_van = await van.Van.create(self.bot, self.name, channel)
-            self.bot.vans.append(new_van)
 
-            settings.Settings.save_vans(self.bot.vans)
+        self.bot.vans.append(new_van)
+        settings.Settings.save_vans(self.bot.vans)
+
+        self.remove()
+
+    def remove(self):
+        self.bot.auto_vans.remove(self)
+        settings.Settings.save_auto_vans(self.bot.auto_vans)
 
     def serialize(self) -> Dict:
         return {

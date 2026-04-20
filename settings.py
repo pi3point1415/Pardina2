@@ -5,6 +5,7 @@ import discord
 
 import auto_van
 import main
+import schedule
 import van
 import location
 
@@ -46,6 +47,7 @@ class Settings:
     alias_path = 'data/alias.json'
     vans_path = 'data/vans.json'
     auto_van_path = 'data/auto_vans.json'
+    schedule_path = 'data/schedule.json'
 
     aliases: Dict[int, str] = {}
 
@@ -109,4 +111,23 @@ class Settings:
     @classmethod
     def save_auto_vans(cls, vans : List[auto_van.AutoVan]):
         with open(cls.auto_van_path, 'w+') as f:
+            json.dump([i.serialize() for i in vans], f, indent=cls.json_indent)
+
+    @classmethod
+    def load_schedule(cls) -> List[schedule.Schedule]:
+        vans = []
+
+        try:
+            with open(cls.schedule_path, 'r') as f:
+                data = json.load(f)
+                for i in data:
+                    vans.append(schedule.Schedule.deserialize(i))
+        except FileNotFoundError, json.decoder.JSONDecodeError:
+            pass
+
+        return vans
+
+    @classmethod
+    def save_schedule(cls, vans : List[schedule.Schedule]):
+        with open(cls.schedule_path, 'w+') as f:
             json.dump([i.serialize() for i in vans], f, indent=cls.json_indent)
