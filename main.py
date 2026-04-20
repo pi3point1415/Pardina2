@@ -1,5 +1,7 @@
+from random import randint, choice
 from typing import *
 import asyncio
+import os
 
 import discord
 
@@ -10,6 +12,8 @@ import van
 import schedule
 import settings
 import quotes
+
+import re
 
 
 class Pardina(discord.Client):
@@ -84,6 +88,15 @@ class Pardina(discord.Client):
             if message.channel.id == settings.Settings.ch_chat_games:
                 await self.command_quote(False)
 
+        if re.search('(?i)sha+rk', message.content):
+            await message.channel.send(f'sh{'a' * randint(5, 15)}rk')
+
+        if re.search('(?i)buf+alo', message.content):
+            path = choice(os.listdir(settings.Settings.buffalo_path))
+            text = path[3:-4].replace('_', ' ')
+            file = discord.File(os.path.join(settings.Settings.buffalo_path, path))
+            await message.channel.send(text, file=file)
+
     async def command_van(self, trigger_msg : discord.Message):
         channel = trigger_msg.channel
         if channel is not None:
@@ -102,7 +115,7 @@ class Pardina(discord.Client):
 
         await trigger_msg.delete()
 
-    async def command_quote(self, daily=True):
+    async def command_quote(self, daily : bool = True):
         channel = await self.ch_chat_games
         if channel is not None:
             msg = self.quotes.random_message(daily)
@@ -139,8 +152,6 @@ class Pardina(discord.Client):
             await asyncio.sleep(delay)
 
             await self.command_quote(True)
-
-
 
 
 def main(client):
