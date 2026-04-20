@@ -43,11 +43,15 @@ class Settings:
 
     ch_van_holds = 1265860905544192101
     alias_channels = [1265860905544192101]
+    quotesirl_link = f'https://discord.com/channels/684865442107359277/685208858427523139/'
 
     alias_path = 'data/alias.json'
     vans_path = 'data/vans.json'
     auto_van_path = 'data/auto_vans.json'
     schedule_path = 'data/schedule.json'
+
+    quotes_done_path = 'data/quotes_done.txt'
+    quotesirl_path = 'data/quotesirl.csv'
 
     aliases: Dict[int, str] = {}
 
