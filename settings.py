@@ -58,6 +58,8 @@ class Settings:
     quotes_done_path = 'data/quotes_done.txt'
     quotesirl_path = 'data/quotesirl.csv'
 
+    buffalo_path = 'buffalo/'
+
     aliases: Dict[int, str] = {}
 
     @classmethod
