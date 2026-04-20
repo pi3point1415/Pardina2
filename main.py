@@ -1,11 +1,15 @@
 from typing import *
+import asyncio
 
 import discord
+
+from datetime import datetime, timedelta
 
 import auto_van
 import van
 import schedule
 import settings
+import quotes
 
 
 class Pardina(discord.Client):
@@ -13,6 +17,8 @@ class Pardina(discord.Client):
         self.vans : List[van.Van] = []
         self.auto_vans : List[auto_van.AutoVan] = []
         self.schedule : List[schedule.Schedule] = []
+
+        self.quotes : quotes.Quotes = quotes.Quotes()
 
         super().__init__(*args, **kwargs)
 
@@ -23,6 +29,8 @@ class Pardina(discord.Client):
 
         self.schedule = settings.Settings.load_schedule()
 
+        asyncio.create_task(self.quotes_loop())
+
         for i in self.schedule:
             if i.is_today and not i.matches_auto_van(self.auto_vans):
                 self.auto_vans.append(i.to_auto_van(self))
@@ -30,7 +38,7 @@ class Pardina(discord.Client):
         # copy so that we still go through all of them if any are removed
         auto_vans = self.auto_vans[::]
         for i in auto_vans:
-            await i.queue_where()
+            asyncio.create_task(i.queue_where())
 
         settings.Settings.save_auto_vans(self.auto_vans)
 
@@ -38,6 +46,17 @@ class Pardina(discord.Client):
     async def ch_van_holds(self) -> discord.abc.Messageable | None:
         try:
             channel = await self.fetch_channel(settings.Settings.ch_van_holds)
+        except discord.NotFound, discord.errors.HTTPException:
+            return None
+        if not isinstance(channel, discord.abc.Messageable):
+            return None
+        else:
+            return channel
+
+    @property
+    async def ch_chat_games(self) -> discord.abc.Messageable | None:
+        try:
+            channel = await self.fetch_channel(settings.Settings.ch_chat_games)
         except discord.NotFound, discord.errors.HTTPException:
             return None
         if not isinstance(channel, discord.abc.Messageable):
@@ -59,8 +78,11 @@ class Pardina(discord.Client):
             if message.channel.id == settings.Settings.ch_van_holds:
                 await self.command_van(message)
         elif message.content.lower().startswith('alias '):
-            if message.channel.id in settings.Settings.alias_channels:
+            if message.channel.id in settings.Settings.ch_alias:
                 await self.command_alias(message)
+        elif message.content.lower() == 'quote':
+            if message.channel.id == settings.Settings.ch_chat_games:
+                await self.command_quote(False)
 
     async def command_van(self, trigger_msg : discord.Message):
         channel = trigger_msg.channel
@@ -80,6 +102,12 @@ class Pardina(discord.Client):
 
         await trigger_msg.delete()
 
+    async def command_quote(self, daily=True):
+        channel = await self.ch_chat_games
+        if channel is not None:
+            msg = self.quotes.random_message(daily)
+            await channel.send(msg)
+
     async def on_raw_reaction_add(self, reaction : discord.RawReactionActionEvent):
         await self.on_raw_reaction_change(reaction)
 
@@ -95,6 +123,24 @@ class Pardina(discord.Client):
         v = await self.van_by_message(message)
         if v is not None:
             await v.update()
+
+    async def quotes_loop(self):
+        while True:
+            quote_time = settings.Settings.quotes_time
+
+            now = datetime.now()
+            target = now.replace(hour=quote_time.hour, minute=quote_time.minute, second=quote_time.second, microsecond=0)
+
+            while target < now:
+                target = target + timedelta(days=1)
+
+            delay = (target - now).total_seconds()
+
+            await asyncio.sleep(delay)
+
+            await self.command_quote(True)
+
+
 
 
 def main(client):

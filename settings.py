@@ -1,7 +1,7 @@
 from typing import *
 import json
 
-import discord
+from datetime import time
 
 import auto_van
 import main
@@ -42,7 +42,12 @@ class Settings:
     ]
 
     ch_van_holds = 1265860905544192101
-    alias_channels = [1265860905544192101]
+    ch_alias = [1265860905544192101]
+    ch_chat_games = 1265860905544192101
+
+    # quotes_time = time(hour=17, minute=0, second=0)
+    quotes_time = time(hour=12, minute=51, second=0)
+
     quotesirl_link = f'https://discord.com/channels/684865442107359277/685208858427523139/'
 
     alias_path = 'data/alias.json'

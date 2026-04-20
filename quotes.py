@@ -18,7 +18,7 @@ class QuoteLine:
         line1 = f'> {self.quote}'
         comments = f', {self.comments}' if len(self.comments) > 0 else ''
         padded = self.quotee + ' ' * max(0, 40 - len(self.quotee))
-        line2 = f'- ||{padded}||{comments}'
+        line2 = f'\\- ||{padded}||{comments}'
         return f'{line1}\n{line2}'
 
 class Quotes:
@@ -65,4 +65,4 @@ class Quotes:
 
     def save_done(self):
         with open (settings.Settings.quotes_done_path, 'w') as f:
-            f.writelines([str(i) for i in self.quotes_done])
+            f.writelines([f'{i}\n' for i in self.quotes_done])
