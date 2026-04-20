@@ -4,5 +4,65 @@
         "channel_id": 1265860905544192101,
         "msg_id": 1495585866406428782,
         "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic. Holds holds between buildings 39 and 24 by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495604666346770443,
+        "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic. Holds at the lot at 158 Mass Ave by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495604787197120572,
+        "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic: Holds at a mystery location by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495605249350697121,
+        "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic: Holds holds between buildings 39 and 24 by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495608127217860669,
+        "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic: Holds holds between buildings 39 and 24 by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495609316500181002,
+        "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic: Holds at the lot at 158 Mass Ave by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495609513745846443,
+        "exp": "2026-04-21"
+    },
+    {
+        "name": "test automatic",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495791623853047859,
+        "exp": "2026-04-22"
+    },
+    {
+        "name": "test automatic",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495792022227910716,
+        "exp": "2026-04-22"
+    },
+    {
+        "name": "test automatic: Holds holds between buildings 39 and 24 by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495792561116287116,
+        "exp": "2026-04-22"
+    },
+    {
+        "name": "test automatic: Holds at a mystery location by default",
+        "channel_id": 1265860905544192101,
+        "msg_id": 1495793059814838415,
+        "exp": "2026-04-22"
     }
 ]

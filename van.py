@@ -4,11 +4,12 @@ from typing import *
 
 import discord
 
-from settings import Settings
+import main
+import settings
 
 
 class Van:
-    def __init__(self, bot : discord.Client, name: str, channel_id : int, msg_id: int, exp: date):
+    def __init__(self, bot : main.Pardina, name: str, channel_id : int, msg_id: int, exp: date):
         self.bot = bot
         self.name = name
         self.channel_id = channel_id
@@ -16,10 +17,10 @@ class Van:
         self.exp = exp
 
     @classmethod
-    async def create(cls, bot : discord.Client, name : str, channel : discord.abc.Messageable) -> Van:
+    async def create(cls, bot : main.Pardina, name : str, channel : discord.abc.Messageable) -> Van:
         msg = await channel.send(f'[Van] **{name}**')
 
-        await msg.add_reaction(choice(Settings.van_emojis))
+        await msg.add_reaction(choice(settings.Settings.van_emojis))
 
         exp = datetime.now().date() + timedelta(days=2)
 
@@ -50,12 +51,15 @@ class Van:
         names = set()
 
         for reaction in await self.reactions:
-            if reaction.emoji in Settings.van_emojis:
+            if reaction.emoji in settings.Settings.van_emojis:
                 async for user in reaction.users():
-                    if user.id == self.bot.user.id:
+                    client = self.bot.user
+                    if client is None:
+                        return
+                    if user.id == client.id:
                         continue
 
-                    alias = Settings.get_alias(user.id)
+                    alias = settings.Settings.get_alias(user.id)
                     if alias is not None:
                         names.add(alias)
                     else:
@@ -80,7 +84,7 @@ class Van:
         }
 
     @classmethod
-    def deserialize(cls, bot, data) -> Van:
+    def deserialize(cls, bot : main.Pardina, data : Dict) -> Van:
         return cls(
             bot = bot,
             name = data['name'],
