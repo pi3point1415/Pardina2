@@ -29,22 +29,12 @@ class Pardina(discord.Client):
 
     async def on_ready(self):
         self.vans = settings.Settings.load_vans(self)
-        self.auto_vans = settings.Settings.load_auto_vans(self)
 
-        self.schedule = settings.Settings.load_schedule()
+        self.auto_vans = settings.Settings.load_auto_vans(self)
+        self.load_schedule()
 
         asyncio.create_task(self.quotes_loop())
-
-        for i in self.schedule:
-            if i.is_today and not i.matches_auto_van(self.auto_vans):
-                self.auto_vans.append(i.to_auto_van(self))
-
-        # copy so that we still go through all of them if any are removed
-        auto_vans = self.auto_vans[::]
-        for i in auto_vans:
-            asyncio.create_task(i.queue_where())
-
-        settings.Settings.save_auto_vans(self.auto_vans)
+        asyncio.create_task(self.daily_loop())
 
     @property
     async def ch_van_holds(self) -> discord.abc.Messageable | None:
@@ -137,6 +127,20 @@ class Pardina(discord.Client):
         if v is not None:
             await v.update()
 
+    def load_schedule(self):
+        self.schedule = settings.Settings.load_schedule()
+
+        for i in self.schedule:
+            if i.is_today and not i.matches_auto_van(self.auto_vans):
+                self.auto_vans.append(i.to_auto_van(self))
+
+        # copy so that we still go through all of them if any are removed
+        auto_vans = self.auto_vans[::]
+        for i in auto_vans:
+            asyncio.create_task(i.queue_where())
+
+        settings.Settings.save_auto_vans(self.auto_vans)
+
     async def quotes_loop(self):
         while True:
             quote_time = settings.Settings.quotes_time
@@ -152,6 +156,24 @@ class Pardina(discord.Client):
             await asyncio.sleep(delay)
 
             await self.command_quote(True)
+
+    async def daily_loop(self):
+        while True:
+            now = datetime.now()
+            target = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            delay = (target - now).total_seconds()
+
+            await asyncio.sleep(delay)
+
+            self.auto_vans = settings.Settings.load_auto_vans(self)
+            self.load_schedule()
+
+            # copy so that we still go through all of them if any are removed
+            vans = self.vans[::]
+
+            for i in vans:
+                if datetime.now().date() >= i.exp:
+                    self.vans.remove(i)
 
 
 def main(client):
