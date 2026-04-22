@@ -1,7 +1,7 @@
 from typing import *
 import json
 
-from datetime import time
+from datetime import time, datetime
 
 import auto_van
 import main
@@ -27,6 +27,8 @@ class Settings:
     quotesirl_path : str = settings['quotesirl_path']
 
     buffalo_path : str = settings['buffalo_path']
+
+    log_path : str = settings['log_path']
 
     van_emojis : List[str] = settings['van_emojis']
     floor_emojis : List[List[str]] = settings['floor_emojis']

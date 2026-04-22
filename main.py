@@ -15,14 +15,18 @@ import quotes
 
 import re
 
+import logging
+from logging.handlers import RotatingFileHandler
 
 class Pardina(discord.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, logger, *args, **kwargs):
         self.vans : List[van.Van] = []
         self.auto_vans : List[auto_van.AutoVan] = []
         self.schedule : List[schedule.Schedule] = []
 
         self.quotes : quotes.Quotes = quotes.Quotes()
+
+        self.logger : logging.Logger = logger
 
         super().__init__(*args, **kwargs)
 
@@ -184,7 +188,30 @@ def main():
     # noinspection PyDunderSlots,PyUnresolvedReferences
     intents.message_content = True
 
-    bot = Pardina(intents=intents)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    formatter = logging.Formatter(
+        '%(asctime)s - [%(levelname)s] %(name)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+
+    fh = RotatingFileHandler(
+        settings.Settings.log_path,
+        maxBytes=5 * 1024 * 1024,
+        backupCount=5,
+        encoding='utf-8',
+        mode='a+'
+    )
+    fh.setFormatter(formatter)
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    bot = Pardina(intents=intents, logger=logger)
 
     bot.run(settings.Settings.token)
 
