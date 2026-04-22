@@ -34,8 +34,8 @@ class Settings:
     locations : Dict[str | None, location.Location] = {i[0]: location.Location(i[1], i[2]) for i in settings['locations']}
 
     ch_van_holds : int = settings['ch_van_holds']
-    ch_alias : List[int] = settings['ch_alias']
     ch_chat_games : int = settings['ch_chat_games']
+    ch_botspam : int = settings['ch_botspam']
 
     quotes_time = time.fromisoformat(settings['quotes_time'])
 

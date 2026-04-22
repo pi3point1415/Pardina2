@@ -69,13 +69,13 @@ class Pardina(discord.Client):
             return
 
         if message.content.lower().startswith('van '):
-            if message.channel.id == settings.Settings.ch_van_holds:
+            if message.channel.id == settings.Settings.ch_van_holds or message.channel.id == settings.Settings.ch_botspam:
                 await self.command_van(message)
         elif message.content.lower().startswith('alias '):
-            if message.channel.id in settings.Settings.ch_alias:
+            if message.channel.id in settings.Settings.ch_van_holds or message.channel.id == settings.Settings.ch_botspam:
                 await self.command_alias(message)
         elif message.content.lower() == 'quote':
-            if message.channel.id == settings.Settings.ch_chat_games:
+            if message.channel.id == settings.Settings.ch_chat_games or message.channel.id == settings.Settings.ch_botspam:
                 await self.command_quote(False)
 
         if re.search('(?i)sha+rk', message.content):
