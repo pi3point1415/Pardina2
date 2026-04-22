@@ -12,52 +12,34 @@ import location
 class Settings:
     json_indent = 4
 
-    van_emojis: List[str] = [
-        '🚌',
-        '🚐',
-        '🚎',
-        '🚍',
-        '🦈',
-        '🕴️',
-        '✈️',
-    ]
+    settings_path = 'data/settings.json'
 
-    locations : Dict[str | None, location.Location] = {
-        '🧑‍✈️': location.Location('the lot at 158 Mass Ave'),
-        '🇦🇱': location.Location('Albany Street Garage', 'holds between buildings 39 and 24'),
-        '🗽': location.Location('beneath Stata'),
-        '❓': location.Location('a mystery location'),
-        None: location.Location('a mystery location'),
-    }
+    settings = json.load(open(settings_path, 'r', encoding='utf-8'))
 
-    floor_emojis : List[List[str]] = [
-        ['🐪', '🔂', '☝️', '💧', '🌩️', '🥇', '🔉'],
-        ['💕', '🐫', '🌱', '✌️', '🧦', '👯', '🍒', '🥂', '🥢', '🥈', '🩰', '🎭', '‼️', '🔰', '👀'],
-        ['🍡', '☘️', '🇮🇲', '🤟', '🚦', '💦', '🫧', '🫐', '🧆', '🍢', '🍨', '🫘', '🥉', '☢️', '☣️', '♨️', '♻️', '💤', '🎶', '🔊', '⚧'],
-        ['🍀', '☠️', '💅', '🦋', '✨', '🪟', '🌥️', '☔', '🛟', '🎛️', '💢', '❌', '❎', '💐'],
-        ['💫', '🖐️', '🌟', '🇻🇳', '🌿', '⭐', '⛅', '🛞', '💮', '🇲🇲', '🇭🇰', '🏳️‍⚧️', '🇸🇨', '🎼'],
-        ['✡️', '❄️', '🌨️', '🔯', '*️⃣', '🍕', '⚛️', '🏳️‍🌈'],
-        ['🌧️', '🍇', '🎰', '🐞', '🧬', '📏'],
-        ['✳️', '❇️', '🪢', '🕸️', '☀️', '🎱', '🚨', '☸️', '🛑', '🔅', '🔆', '🔝', '🇲🇰']
-    ]
+    token : str = settings['token']
 
-    ch_van_holds = 1265860905544192101
-    ch_alias = [1265860905544192101]
-    ch_chat_games = 1265860905544192101
+    alias_path : str = settings['alias_path']
+    vans_path : str = settings['vans_path']
+    auto_van_path : str = settings['auto_van_path']
+    schedule_path : str = settings['schedule_path']
 
-    quotes_time = time(hour=17, minute=0, second=0)
+    quotes_done_path : str = settings['quotes_done_path']
+    quotesirl_path : str = settings['quotesirl_path']
 
-    quotesirl_link = f'https://discord.com/channels/684865442107359277/685208858427523139/'
+    buffalo_path : str = settings['buffalo_path']
 
-    alias_path = 'data/alias.json'
-    vans_path = 'data/vans.json'
-    auto_van_path = 'data/auto_vans.json'
-    schedule_path = 'data/schedule.json'
+    van_emojis : List[str] = settings['van_emojis']
+    floor_emojis : List[List[str]] = settings['floor_emojis']
 
-    quotes_done_path = 'data/quotes_done.txt'
-    quotesirl_path = 'data/quotesirl.csv'
+    locations : Dict[str | None, location.Location] = {i[0]: location.Location(i[1], i[2]) for i in settings['locations']}
 
-    buffalo_path = 'buffalo/'
+    ch_van_holds : int = settings['ch_van_holds']
+    ch_alias : List[int] = settings['ch_alias']
+    ch_chat_games : int = settings['ch_chat_games']
+
+    quotes_time = time.fromisoformat(settings['quotes_time'])
+
+    quotesirl_link : str = settings['quotesirl_link']
 
     aliases: Dict[int, str] = {}
 

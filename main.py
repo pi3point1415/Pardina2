@@ -176,17 +176,15 @@ class Pardina(discord.Client):
                     self.vans.remove(i)
 
 
-def main(client):
-    with open('token', 'r') as f:
-        token = f.read()
-        client.run(token)
-
-
-if __name__ == '__main__':
+def main():
     intents = discord.Intents.default()
     # noinspection PyDunderSlots,PyUnresolvedReferences
     intents.message_content = True
 
     bot = Pardina(intents=intents)
 
-    main(bot)
+    bot.run(settings.Settings.token)
+
+
+if __name__ == '__main__':
+    main()
