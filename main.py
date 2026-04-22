@@ -76,7 +76,7 @@ class Pardina(discord.Client):
                 await self.command_alias(message)
         elif message.content.lower() == 'quote':
             if message.channel.id == settings.Settings.ch_chat_games or message.channel.id == settings.Settings.ch_botspam:
-                await self.command_quote(False)
+                await self.command_quote(message)
 
         if re.search('(?i)sha+rk', message.content):
             await message.channel.send(f'sh{'a' * randint(5, 15)}rk')
@@ -105,10 +105,13 @@ class Pardina(discord.Client):
 
         await trigger_msg.delete()
 
-    async def command_quote(self, daily : bool = True):
-        channel = await self.ch_chat_games
+    async def command_quote(self, message : discord.Message | None = None):
+        if message is None:
+            channel = await self.ch_chat_games
+        else:
+            channel = message.channel
         if channel is not None:
-            msg = self.quotes.random_message(daily)
+            msg = self.quotes.random_message(message is None)
             await channel.send(msg)
 
     async def on_raw_reaction_add(self, reaction : discord.RawReactionActionEvent):
@@ -155,7 +158,7 @@ class Pardina(discord.Client):
 
             await asyncio.sleep(delay)
 
-            await self.command_quote(True)
+            await self.command_quote()
 
     async def daily_loop(self):
         while True:
