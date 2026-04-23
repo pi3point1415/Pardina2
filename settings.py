@@ -38,6 +38,7 @@ class Settings:
     ch_van_holds : int = settings['ch_van_holds']
     ch_chat_games : int = settings['ch_chat_games']
     ch_botspam : int = settings['ch_botspam']
+    ch_people_visiting : int = settings['ch_people_visiting']
 
     quotes_time = time.fromisoformat(settings['quotes_time'])
 

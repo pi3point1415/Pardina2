@@ -64,6 +64,17 @@ class Pardina(discord.Client):
         else:
             return channel
 
+    @property
+    async def ch_people_visiting(self) -> discord.abc.Messageable | None:
+        try:
+            channel = await self.fetch_channel(settings.Settings.ch_people_visiting)
+        except discord.NotFound, discord.errors.HTTPException:
+            return None
+        if not isinstance(channel, discord.abc.Messageable):
+            return None
+        else:
+            return channel
+
     async def van_by_message(self, message : discord.Message) -> van.Van | None:
         for i in self.vans:
             if i.msg_id == message.id:
@@ -194,6 +205,18 @@ class Pardina(discord.Client):
                 if datetime.now().date() >= i.exp:
                     self.vans.remove(i)
                     self.logger.log(logging.INFO, f'Removing expired van {i.name}')
+
+            channel = await self.ch_people_visiting
+
+            if channel is not None:
+                async for msg in channel.history(limit=None):
+                    now = datetime.now()
+                    msg_time = msg.created_at
+                    diff = msg_time - now
+                    if diff.days >= 17 and msg.id != 892970388693336095:
+                        await msg.delete()
+                        self.logger.log(logging.INFO,
+                                        f'Deleted message [time: {msg.created_at}, author: {msg.author.id}, content: {msg.content}]')
 
 
 def main():
