@@ -1,13 +1,12 @@
+from datetime import time, datetime
 from typing import *
 
-from datetime import time, datetime
-
-import main
 import auto_van
+import main
 
 
 class Schedule:
-    def __init__(self, name : str, day : int, where_time : time | None, van_time : time):
+    def __init__(self, name: str, day: int, where_time: time | None, van_time: time):
         self.name = name
         self.day = day
         self.where_time = where_time
@@ -17,18 +16,18 @@ class Schedule:
     def is_today(self):
         return self.day == datetime.now().weekday()
 
-    def matches_auto_van(self, auto_vans : List[auto_van.AutoVan]):
+    def matches_auto_van(self, auto_vans: List[auto_van.AutoVan]):
         for other in auto_vans:
             if (
-                self.name == other.name and
-                self.day == other.day and
-                self.where_time == other.where_time and
-                self.van_time == other.van_time
+                    self.name == other.name and
+                    self.day == other.day and
+                    self.where_time == other.where_time and
+                    self.van_time == other.van_time
             ):
                 return True
         return False
 
-    def to_auto_van(self, bot : main.Pardina):
+    def to_auto_van(self, bot: main.Pardina):
         return auto_van.AutoVan(
             bot=bot,
             name=self.name,
@@ -46,7 +45,7 @@ class Schedule:
         }
 
     @classmethod
-    def deserialize(cls, data : Dict) -> Schedule:
+    def deserialize(cls, data: Dict) -> Schedule:
         return Schedule(
             name=data['name'],
             day=data['day'],

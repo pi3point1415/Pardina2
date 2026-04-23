@@ -1,8 +1,8 @@
 import csv
-import settings
-
-from random import choice
 from collections import defaultdict
+from random import choice
+
+import settings
 
 
 class QuoteLine:
@@ -21,15 +21,15 @@ class QuoteLine:
         line2 = f'\\- ||{padded}||{comments}'
         return f'{line1}\n{line2}'
 
+
 class Quotes:
     def __init__(self):
-        with open (settings.Settings.quotesirl_path, 'r', encoding='utf-8') as f:
+        with open(settings.Settings.quotesirl_path, 'r', encoding='utf-8') as f:
             quotes = list(csv.reader(f))[1:]
 
             self.quotes = [QuoteLine(*quote[:6]) for quote in quotes]
 
-
-        with open (settings.Settings.quotes_done_path, 'r') as f:
+        with open(settings.Settings.quotes_done_path, 'r') as f:
             self.quotes_done = [int(i.rstrip()) for i in f.readlines()]
 
     def group_quotes(self, filtered=True):
@@ -64,5 +64,5 @@ class Quotes:
         return f'{header}\n{text}\nlink: ||<{settings.Settings.quotesirl_link}{quote[0].id}>||'
 
     def save_done(self):
-        with open (settings.Settings.quotes_done_path, 'w') as f:
+        with open(settings.Settings.quotes_done_path, 'w') as f:
             f.writelines([f'{i}\n' for i in self.quotes_done])

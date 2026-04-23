@@ -1,35 +1,51 @@
+import asyncio
+import logging
+import os
+import re
+from datetime import datetime, timedelta
+from logging.handlers import RotatingFileHandler
 from random import randint, choice
 from typing import *
-import asyncio
-import os
 
 import discord
-
-from datetime import datetime, timedelta
+import discord.abc
 
 import auto_van
-import van
+import quotes
 import schedule
 import settings
-import quotes
+import van
 
-import re
+type StandardMessage = (discord.TextChannel |
+                        discord.VoiceChannel |
+                        discord.StageChannel |
+                        discord.Thread |
+                        discord.DMChannel |
+                        discord.PartialMessageable |
+                        discord.GroupChannel)
 
-import logging
-from logging.handlers import RotatingFileHandler
+STANDARD_MESSAGE_TYPES = (
+    discord.TextChannel,
+    discord.VoiceChannel,
+    discord.StageChannel,
+    discord.Thread,
+    discord.DMChannel,
+    discord.PartialMessageable,
+    discord.GroupChannel,
+)
+
 
 class Pardina(discord.Client):
     def __init__(self, logger, *args, **kwargs):
-        self.vans : List[van.Van] = []
-        self.auto_vans : List[auto_van.AutoVan] = []
-        self.schedule : List[schedule.Schedule] = []
+        self.vans: List[van.Van] = []
+        self.auto_vans: List[auto_van.AutoVan] = []
+        self.schedule: List[schedule.Schedule] = []
 
-        self.quotes : quotes.Quotes = quotes.Quotes()
+        self.quotes: quotes.Quotes = quotes.Quotes()
 
-        self.logger : logging.Logger = logger
+        self.logger: logging.Logger = logger
 
         super().__init__(*args, **kwargs)
-
 
     async def on_ready(self):
         self.vans = settings.Settings.load_vans(self)
@@ -42,46 +58,35 @@ class Pardina(discord.Client):
 
         self.logger.log(logging.INFO, "Pardina ready")
 
-    @property
-    async def ch_van_holds(self) -> discord.abc.Messageable | None:
+    async def get_channel_by_id(self, channel_id: int) -> StandardMessage | None:
         try:
-            channel = await self.fetch_channel(settings.Settings.ch_van_holds)
-        except discord.NotFound, discord.errors.HTTPException:
+            channel = await self.fetch_channel(channel_id)
+        except (discord.NotFound, discord.errors.HTTPException):
             return None
-        if not isinstance(channel, discord.abc.Messageable):
+        if not isinstance(channel, STANDARD_MESSAGE_TYPES):
             return None
         else:
             return channel
 
     @property
-    async def ch_chat_games(self) -> discord.abc.Messageable | None:
-        try:
-            channel = await self.fetch_channel(settings.Settings.ch_chat_games)
-        except discord.NotFound, discord.errors.HTTPException:
-            return None
-        if not isinstance(channel, discord.abc.Messageable):
-            return None
-        else:
-            return channel
+    async def ch_van_holds(self) -> StandardMessage | None:
+        return await self.get_channel_by_id(settings.Settings.ch_van_holds)
 
     @property
-    async def ch_people_visiting(self) -> discord.abc.Messageable | None:
-        try:
-            channel = await self.fetch_channel(settings.Settings.ch_people_visiting)
-        except discord.NotFound, discord.errors.HTTPException:
-            return None
-        if not isinstance(channel, discord.abc.Messageable):
-            return None
-        else:
-            return channel
+    async def ch_chat_games(self) -> StandardMessage | None:
+        return await self.get_channel_by_id(settings.Settings.ch_chat_games)
 
-    async def van_by_message(self, message : discord.Message) -> van.Van | None:
+    @property
+    async def ch_people_visiting(self) -> StandardMessage | None:
+        return await self.get_channel_by_id(settings.Settings.ch_people_visiting)
+
+    async def van_by_message(self, message: discord.Message) -> van.Van | None:
         for i in self.vans:
             if i.msg_id == message.id:
                 return i
         return None
 
-    async def on_message(self, message : discord.Message):
+    async def on_message(self, message: discord.Message):
         if message.author == self.user:
             return
 
@@ -106,7 +111,7 @@ class Pardina(discord.Client):
             await message.channel.send(text, file=file)
             self.logger.log(logging.INFO, f'Buffalo message sent in channel {message.channel.id}')
 
-    async def command_van(self, trigger_msg : discord.Message):
+    async def command_van(self, trigger_msg: discord.Message):
         channel = trigger_msg.channel
         if channel is not None:
             name = trigger_msg.content[4:]
@@ -115,7 +120,7 @@ class Pardina(discord.Client):
 
         settings.Settings.save_vans(self.vans)
 
-    async def command_alias(self, trigger_msg : discord.Message):
+    async def command_alias(self, trigger_msg: discord.Message):
         name = trigger_msg.content[6:]
         settings.Settings.add_alias(trigger_msg.author.id, name)
         self.logger.log(logging.INFO, f'Alias of user {trigger_msg.author.id} changed to {name}')
@@ -125,7 +130,7 @@ class Pardina(discord.Client):
 
         await trigger_msg.delete()
 
-    async def command_quote(self, message : discord.Message | None = None):
+    async def command_quote(self, message: discord.Message | None = None):
         if message is None:
             channel = await self.ch_chat_games
         else:
@@ -133,16 +138,16 @@ class Pardina(discord.Client):
         if channel is not None:
             msg = self.quotes.random_message(message is None)
             await channel.send(msg)
-            self.logger.log(logging.INFO, f'{'Random' if message is None else 'Daily'} quote created in channel {channel.id}')
+            self.logger.log(logging.INFO,
+                            f'{'Random' if message is None else 'Daily'} quote created in channel {channel.id}')
 
-
-    async def on_raw_reaction_add(self, reaction : discord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, reaction: discord.RawReactionActionEvent):
         await self.on_raw_reaction_change(reaction)
 
-    async def on_raw_reaction_remove(self, reaction : discord.RawReactionActionEvent):
+    async def on_raw_reaction_remove(self, reaction: discord.RawReactionActionEvent):
         await self.on_raw_reaction_change(reaction)
 
-    async def on_raw_reaction_change(self, reaction : discord.RawReactionActionEvent):
+    async def on_raw_reaction_change(self, reaction: discord.RawReactionActionEvent):
         channel = await self.fetch_channel(reaction.channel_id)
         if not isinstance(channel, discord.abc.Messageable):
             return
@@ -172,7 +177,8 @@ class Pardina(discord.Client):
             quote_time = settings.Settings.quotes_time
 
             now = datetime.now()
-            target = now.replace(hour=quote_time.hour, minute=quote_time.minute, second=quote_time.second, microsecond=0)
+            target = now.replace(hour=quote_time.hour, minute=quote_time.minute, second=quote_time.second,
+                                 microsecond=0)
 
             while target < now:
                 target = target + timedelta(days=1)

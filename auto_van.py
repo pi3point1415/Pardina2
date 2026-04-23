@@ -1,16 +1,12 @@
 import asyncio
-from typing import *
+import logging
 from datetime import time, datetime
 from random import choice
-
-import discord
-
-import settings
-
-import van
+from typing import *
 
 import main
-import logging
+import settings
+import van
 
 
 class AutoVan:
@@ -19,10 +15,10 @@ class AutoVan:
             name: str,
             day: int,
             where_time: time | None,
-            van_time : time,
-            channel_id : int | None = None,
-            msg_id : int | None = None,
-        ):
+            van_time: time,
+            channel_id: int | None = None,
+            msg_id: int | None = None,
+    ):
         self.bot = bot
         self.name = name
         self.day = day
@@ -61,9 +57,9 @@ class AutoVan:
 
         await asyncio.sleep(delay)
 
-        channel = await self.bot.fetch_channel(settings.Settings.ch_van_holds)
+        channel = await self.bot.ch_van_holds
 
-        if not isinstance(channel, discord.abc.Messageable):
+        if channel is None:
             return
 
         msg = await channel.send('Where is the van?')
@@ -105,16 +101,16 @@ class AutoVan:
         await asyncio.sleep(delay)
 
         if self.where_time is not None and self.msg_id is not None and self.channel_id is not None:
-            channel = await self.bot.fetch_channel(self.channel_id)
+            channel = await self.bot.get_channel_by_id(self.channel_id)
 
-            if not isinstance(channel, discord.abc.Messageable):
+            if channel is None:
                 return
 
             where = await channel.fetch_message(self.msg_id)
             reactions = where.reactions
 
-            emoji : str | None = None
-            floor : int = -1
+            emoji: str | None = None
+            floor: int = -1
 
             for i in reactions:
                 if i.count >= 2:
@@ -134,9 +130,9 @@ class AutoVan:
 
             new_van = await van.Van.create(self.bot, f'{self.name}: {location.str_hold()}', channel)
         else:
-            channel = await self.bot.fetch_channel(settings.Settings.ch_van_holds)
+            channel = await self.bot.ch_van_holds
 
-            if not isinstance(channel, discord.abc.Messageable):
+            if channel is None:
                 return
 
             new_van = await van.Van.create(self.bot, self.name, channel)

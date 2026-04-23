@@ -1,5 +1,5 @@
 class Location:
-    def __init__(self, desc : str, hold : str|None = None):
+    def __init__(self, desc: str, hold: str | None = None):
         self.desc = desc
         self.hold = hold
 
@@ -8,13 +8,3 @@ class Location:
 
     def str_hold(self):
         return f'Holds {self.hold if self.hold else f'at {self.desc}'} by default'
-
-    def serialize(self):
-        return {
-            'desc': self.desc,
-            'hold': self.hold,
-        }
-
-    @staticmethod
-    def deserialize(d) -> Location:
-        return Location(d['desc'], d['hold'])

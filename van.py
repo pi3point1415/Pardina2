@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta, datetime, date
 from random import choice
 from typing import *
@@ -7,11 +8,9 @@ import discord
 import main
 import settings
 
-import logging
-
 
 class Van:
-    def __init__(self, bot : main.Pardina, name: str, channel_id : int, msg_id: int, exp: date):
+    def __init__(self, bot: main.Pardina, name: str, channel_id: int, msg_id: int, exp: date):
         self.bot = bot
         self.name = name
         self.channel_id = channel_id
@@ -22,7 +21,7 @@ class Van:
         self.logger.log(logging.INFO, f'Creating new van "{name}"')
 
     @classmethod
-    async def create(cls, bot : main.Pardina, name : str, channel : discord.abc.Messageable) -> Van:
+    async def create(cls, bot: main.Pardina, name: str, channel: main.StandardMessage) -> Van:
         msg = await channel.send(f'[Van] **{name}**')
 
         await msg.add_reaction(choice(settings.Settings.van_emojis))
@@ -35,9 +34,9 @@ class Van:
 
     @property
     async def msg(self) -> discord.Message | None:
-        channel = await self.bot.fetch_channel(self.channel_id)
+        channel = await self.bot.get_channel_by_id(self.channel_id)
 
-        if not isinstance(channel, discord.abc.Messageable):
+        if channel is None:
             return None
 
         return await channel.fetch_message(self.msg_id)
@@ -50,7 +49,6 @@ class Van:
             return []
 
         return msg.reactions
-
 
     async def update(self) -> None:
         names = set()
@@ -91,11 +89,11 @@ class Van:
         }
 
     @classmethod
-    def deserialize(cls, bot : main.Pardina, data : Dict) -> Van:
+    def deserialize(cls, bot: main.Pardina, data: Dict) -> Van:
         return cls(
-            bot = bot,
-            name = data['name'],
-            channel_id = data['channel_id'],
-            msg_id = data['msg_id'],
-            exp = date.fromisoformat(data['exp']),
+            bot=bot,
+            name=data['name'],
+            channel_id=data['channel_id'],
+            msg_id=data['msg_id'],
+            exp=date.fromisoformat(data['exp']),
         )
