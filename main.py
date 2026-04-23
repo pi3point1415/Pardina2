@@ -40,6 +40,8 @@ class Pardina(discord.Client):
         asyncio.create_task(self.quotes_loop())
         asyncio.create_task(self.daily_loop())
 
+        self.logger.log(logging.INFO, "Pardina ready")
+
     @property
     async def ch_van_holds(self) -> discord.abc.Messageable | None:
         try:
@@ -84,12 +86,14 @@ class Pardina(discord.Client):
 
         if re.search('(?i)sha+rk', message.content):
             await message.channel.send(f'sh{'a' * randint(5, 15)}rk')
+            self.logger.log(logging.INFO, f'Shark message sent in channel {message.channel.id}')
 
         if re.search('(?i)buf+alo', message.content):
             path = choice(os.listdir(settings.Settings.buffalo_path))
             text = path[3:-4].replace('_', ' ')
             file = discord.File(os.path.join(settings.Settings.buffalo_path, path))
             await message.channel.send(text, file=file)
+            self.logger.log(logging.INFO, f'Buffalo message sent in channel {message.channel.id}')
 
     async def command_van(self, trigger_msg : discord.Message):
         channel = trigger_msg.channel
@@ -103,6 +107,7 @@ class Pardina(discord.Client):
     async def command_alias(self, trigger_msg : discord.Message):
         name = trigger_msg.content[6:]
         settings.Settings.add_alias(trigger_msg.author.id, name)
+        self.logger.log(logging.INFO, f'Alias of user {trigger_msg.author.id} changed to {name}')
 
         for i in self.vans:
             await i.update()
@@ -117,6 +122,8 @@ class Pardina(discord.Client):
         if channel is not None:
             msg = self.quotes.random_message(message is None)
             await channel.send(msg)
+            self.logger.log(logging.INFO, f'{'Random' if message is None else 'Daily'} quote created in channel {channel.id}')
+
 
     async def on_raw_reaction_add(self, reaction : discord.RawReactionActionEvent):
         await self.on_raw_reaction_change(reaction)
@@ -139,7 +146,8 @@ class Pardina(discord.Client):
 
         for i in self.schedule:
             if i.is_today and not i.matches_auto_van(self.auto_vans):
-                self.auto_vans.append(i.to_auto_van(self))
+                v = i.to_auto_van(self)
+                self.auto_vans.append(v)
 
         # copy so that we still go through all of them if any are removed
         auto_vans = self.auto_vans[::]
@@ -160,6 +168,8 @@ class Pardina(discord.Client):
 
             delay = (target - now).total_seconds()
 
+            self.logger.log(logging.INFO, f'Quotes loop started for target time {target.strftime('%Y-%m-%d %H:%M:%S')}')
+
             await asyncio.sleep(delay)
 
             await self.command_quote()
@@ -169,6 +179,8 @@ class Pardina(discord.Client):
             now = datetime.now()
             target = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
             delay = (target - now).total_seconds()
+
+            self.logger.log(logging.INFO, f'Daily loop started for target time {target.strftime('%Y-%m-%d %H:%M:%S')}')
 
             await asyncio.sleep(delay)
 
@@ -181,6 +193,7 @@ class Pardina(discord.Client):
             for i in vans:
                 if datetime.now().date() >= i.exp:
                     self.vans.remove(i)
+                    self.logger.log(logging.INFO, f'Removing expired van {i.name}')
 
 
 def main():

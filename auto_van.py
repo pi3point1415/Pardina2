@@ -10,6 +10,7 @@ import settings
 import van
 
 import main
+import logging
 
 
 class AutoVan:
@@ -31,6 +32,10 @@ class AutoVan:
         self.channel_id = channel_id
         self.msg_id = msg_id
 
+        self.logger = bot.logger
+
+        self.logger.log(logging.INFO, f'Creating new auto van "{name}"')
+
     async def queue_where(self):
         if self.where_time is None:
             await self.queue_van()
@@ -50,6 +55,9 @@ class AutoVan:
             return
 
         delay = (where_time - now).total_seconds()
+
+        self.logger.log(logging.INFO,
+                        f'Auto van "{self.name}" where messaged queued for {where_time.strftime('%Y-%m-%d %H:%M:%S')}')
 
         await asyncio.sleep(delay)
 
@@ -90,6 +98,9 @@ class AutoVan:
             return
 
         delay = (van_time - now).total_seconds()
+
+        self.logger.log(logging.INFO,
+                        f'Auto van "{self.name}" van messaged queued for {van_time.strftime('%Y-%m-%d %H:%M:%S')}')
 
         await asyncio.sleep(delay)
 

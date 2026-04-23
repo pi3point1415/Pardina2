@@ -7,6 +7,8 @@ import discord
 import main
 import settings
 
+import logging
+
 
 class Van:
     def __init__(self, bot : main.Pardina, name: str, channel_id : int, msg_id: int, exp: date):
@@ -15,6 +17,9 @@ class Van:
         self.channel_id = channel_id
         self.msg_id = msg_id
         self.exp = exp
+        self.logger = bot.logger
+
+        self.logger.log(logging.INFO, f'Creating new van "{name}"')
 
     @classmethod
     async def create(cls, bot : main.Pardina, name : str, channel : discord.abc.Messageable) -> Van:
@@ -69,6 +74,8 @@ class Van:
 
         if msg is None:
             return
+
+        self.logger.log(logging.INFO, f'Van "{self.name}" updated to hold list "{', '.join(names)}"')
 
         if len(names) == 0:
             await msg.edit(content=f'[Van] **{self.name}**')
