@@ -50,8 +50,7 @@ class Pardina(discord.Client):
     async def on_ready(self):
         self.vans = settings.Settings.load_vans(self)
 
-        self.auto_vans = settings.Settings.load_auto_vans(self)
-        self.load_schedule()
+        await self.daily_tasks()
 
         asyncio.create_task(self.quotes_loop())
         asyncio.create_task(self.daily_loop())
@@ -191,6 +190,30 @@ class Pardina(discord.Client):
 
             await self.command_quote()
 
+    async def daily_tasks(self):
+        self.auto_vans = settings.Settings.load_auto_vans(self)
+        self.load_schedule()
+
+        # copy so that we still go through all of them if any are removed
+        vans = self.vans[::]
+
+        for i in vans:
+            if datetime.now().date() >= i.exp:
+                self.vans.remove(i)
+                self.logger.log(logging.INFO, f'Removing expired van {i.name}')
+
+        channel = await self.ch_people_visiting
+
+        if channel is not None:
+            async for msg in channel.history(limit=None):
+                now = datetime.now().astimezone()
+                msg_time = msg.created_at
+                diff = now - msg_time
+                if diff.days >= 17 and msg.id != 892970388693336095:
+                    await msg.delete()
+                    self.logger.log(logging.INFO,
+                                    f'Deleted message [time: {msg.created_at}, author: {msg.author.id}, content: {msg.content}]')
+
     async def daily_loop(self):
         while True:
             now = datetime.now()
@@ -201,28 +224,7 @@ class Pardina(discord.Client):
 
             await asyncio.sleep(delay)
 
-            self.auto_vans = settings.Settings.load_auto_vans(self)
-            self.load_schedule()
-
-            # copy so that we still go through all of them if any are removed
-            vans = self.vans[::]
-
-            for i in vans:
-                if datetime.now().date() >= i.exp:
-                    self.vans.remove(i)
-                    self.logger.log(logging.INFO, f'Removing expired van {i.name}')
-
-            channel = await self.ch_people_visiting
-
-            if channel is not None:
-                async for msg in channel.history(limit=None):
-                    now = datetime.now().astimezone()
-                    msg_time = msg.created_at
-                    diff = msg_time - now
-                    if diff.days >= 17 and msg.id != 892970388693336095:
-                        await msg.delete()
-                        self.logger.log(logging.INFO,
-                                        f'Deleted message [time: {msg.created_at}, author: {msg.author.id}, content: {msg.content}]')
+            await self.daily_tasks()
 
 
 def main():
