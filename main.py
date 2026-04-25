@@ -216,7 +216,7 @@ class Pardina(discord.Client):
 
             if channel is not None:
                 async for msg in channel.history(limit=None):
-                    now = datetime.now()
+                    now = datetime.now().astimezone()
                     msg_time = msg.created_at
                     diff = msg_time - now
                     if diff.days >= 17 and msg.id != 892970388693336095:
